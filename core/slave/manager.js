@@ -119,7 +119,7 @@ class Manager {
 
     if (availableSlave) {
       logger.debug('%s----->> dispatch to %s with %s %j', EOL, availableSlave.sysInfo.hostname, EOL, data);
-      availableSlave.status = STATUS.BUSY;
+      // availableSlave.status = STATUS.BUSY;
       availableSlave.sock.send(JSON.stringify(data));
 
       Object.keys(cluster.workers).forEach((id) => {

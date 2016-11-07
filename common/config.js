@@ -16,8 +16,8 @@ const defaultCfg = {
   database: `mongodb://${mongo}/reliable`,
   site: {
     title: 'Reliable',
-    baseurl: 'http://reliable-test.com',
-    locale: 'en-US',
+    baseurl: 'http://mac.cn:3333',
+    locale: 'zh-CN',
     docurl: 'https://macacajs.github.io/macaca',
     issueurl: 'https://github.com/reliablejs/reliable-master',
     login: true
@@ -35,18 +35,21 @@ const defaultCfg = {
     }
   },
   mail: {
-    name: 'reliable test',
+    name: '李小蛟',
     port: 465,
-    host: 'smtp.reliable-test.com',
+    host: 'smtp.163.com',
     secure: true,
     ignoreTLS: true,
     auth: {
-      user: 'test@reliable-test.com',
-      pass: 'reliable'
+      user: 'lixiaojiao_hit@163.com',
+      pass: '111'
     },
     sloganImage: 'https://avatars0.githubusercontent.com/u/9263042?v=3&s=200'
   },
-  plugins: {},
+  plugins: {
+    'reliable-plugin-dingtalk': true,
+    'reliable-plugin-slack':true
+  },
   pluginTextPrefix: 'reliable-plugin'
 };
 
