@@ -60,7 +60,6 @@
     "jsx-loader": "~0.13.2",
     "killing": "~1.0.1",
     "mocha": "~2.4.5",
-//    "pre-commit": "~1.1.1",
     "react-d3-components": "~0.6.0",
     "should": "*",
     "webpack": "^1.13.1"
@@ -69,9 +68,6 @@
     "test": "make test",
     "lint": "make lint"
   },
-  "pre-commit": [
-    "lint"
-  ],
   "engines": {
     "node": ">=4.2.1"
   },
