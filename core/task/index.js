@@ -13,9 +13,12 @@ exports.bind = function() {
   if (cluster.isWorker) {
     cluster.worker.on('message', (e) => {
       switch (e.message) {
+        //检查项目，为项目创建task
         case 'project':
           project();
           break;
+
+        //分发任务
         case 'dispatch':
           dispatch();
           break;
@@ -25,6 +28,7 @@ exports.bind = function() {
         case 'archive':
           archive(e.data);
           break;
+        //检查任务是否过期，过期，超过一小时扔回到队列
         case 'check':
           check(e);
           break;

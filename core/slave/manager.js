@@ -61,7 +61,7 @@ class Manager {
           });
           logger.debug('%s<----- zmq message %s%j', EOL, EOL, data);
           this.slaves[hostname || _hostname].sysInfo = data.sysInfo;
-          this.slaves[hostname || _hostname].status = data.status;
+          // this.slaves[hostname || _hostname].status = data.status;
           break;
         case 'monitor':
           this.slaves[hostname || _hostname].sysInfo = data.sysInfo;

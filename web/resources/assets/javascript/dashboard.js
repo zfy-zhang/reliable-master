@@ -220,7 +220,7 @@ if (charts) {
     var editText = modalLabel.data('editText');
 
     $('#project-modal').find('select').each(function(e, node) {
-      node.selectedIndex = 1;
+      node.selectedIndex = 0;
     });
 
     $('#table-environment').html('');
