@@ -38,5 +38,12 @@ module.exports = function(app) {
   app.post('/api/task/:method/gitlab-push.json', service.gitlabCi, controllers.api.task);
 
   app.get('/api/data', auth.user, controllers.api.data);
+
+
+
+  //matc
+  app.get('/matc/devices/:method', controllers.matc.devices);
+
+
   logger.debug('router set');
 };
