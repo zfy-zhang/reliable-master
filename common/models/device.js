@@ -175,11 +175,76 @@ Devicechema.methods.updateById = function(id, data) {
   return promise;
 };
 
+Devicechema.methods.updateBySlaveId = function(slaveId,serialNumbers, data) {
+  const promise = new P();
+
+  Device.update({
+    slaveId: slaveId,
+    status:1,
+    serialNumber:{
+      $nin:serialNumbers
+    }
+  }, data, {
+    upsert: false
+  }, (error, data) => {
+
+    if (error) {
+      promise.reject(error);
+    } else {
+      promise.resolve(null, data);
+    }
+  });
+  return promise;
+};
+
+/**
+ * slave没有的情况下，将所有可用设备设置为不可用
+ * @param slaveId
+ * @param serialNumbers
+ * @param data
+ * @returns {*}
+ */
+Devicechema.methods.updateByStatus = function(data) {
+  const promise = new P();
+
+  Device.update({
+    status:1
+  }, data, {
+    upsert: false
+  }, (error, data) => {
+
+    if (error) {
+      promise.reject(error);
+    } else {
+      promise.resolve(null, data);
+    }
+  });
+  return promise;
+};
+
+
 Devicechema.methods.getById = function(id) {
   const promise = new P();
 
   Device.findOne({
     _id: id
+  }, (error, data) => {
+
+    if (error) {
+      promise.reject(error);
+    } else {
+      promise.resolve(null, data);
+    }
+  });
+  return promise;
+};
+
+
+Devicechema.methods.queryValidDevices = function() {
+  const promise = new P();
+
+  Device.find({
+    status: 1
   }, (error, data) => {
 
     if (error) {

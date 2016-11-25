@@ -110,6 +110,31 @@ Slavechema.methods.updateById = function(id, data) {
   return promise;
 };
 
+/**
+ * slave没有的情况下，将所有slaves设置为不可用
+ * @param slaveId
+ * @param serialNumbers
+ * @param data
+ * @returns {*}
+ */
+Slavechema.methods.updateByStatus = function(data) {
+  const promise = new P();
+
+  Slave.update({
+    status:1
+  }, data, {
+    upsert: false
+  }, (error, data) => {
+
+    if (error) {
+      promise.reject(error);
+    } else {
+      promise.resolve(null, data);
+    }
+  });
+  return promise;
+};
+
 Slavechema.methods.getById = function(id) {
   const promise = new P();
 

@@ -157,6 +157,10 @@ const ProjectSchema = new Schema({
 
   last_modify_email: {
     type: String
+  },
+
+  serialNumber: {
+    type: String
   }
 });
 
