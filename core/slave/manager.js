@@ -2,11 +2,16 @@
 
 const zmq = require('zmq');
 const EOL = require('os').EOL;
+const co = require('co');
+
 const cluster = require('cluster');
 const events = require('reliable-events');
 
 const _ = require('../../common/utils/helper');
 const logger = require('../../common/utils/logger');
+const models = require('../../common/models');
+
+const Device = models.Device;
 
 const STATUS = {
   AVAILABLE: 'available',
@@ -120,15 +125,45 @@ class Manager {
     if (availableSlave) {
       logger.debug('%s----->> dispatch to %s with %s %j', EOL, availableSlave.sysInfo.hostname, EOL, data);
       // availableSlave.status = STATUS.BUSY;
-      availableSlave.sock.send(JSON.stringify(data));
+      console.log('devices:',data.serialNumber);
+      var serialNumber = data.serialNumber;
 
-      Object.keys(cluster.workers).forEach((id) => {
-        cluster.workers[id].send({
-          message: 'dispatchSuccess',
-          data: data,
-          slave: availableSlave
+      if(serialNumber){
+        var device = new Device();
+        //根据序列号查询数据库中是否存在该设备
+
+        co(function *() {
+          const deviceDb =  yield device.getBySerialNumber(serialNumber);
+
+          //如果设备可用，则发送任务
+          if(deviceDb!=null&&deviceDb.status==1){
+            console.log('device is available:',serialNumber);
+            availableSlave.sock.send(JSON.stringify(data));
+
+            Object.keys(cluster.workers).forEach((id) => {
+              cluster.workers[id].send({
+                message: 'dispatchSuccess',
+                data: data,
+                slave: availableSlave
+              });
+            });
+          }else{
+            console.log('device is unavailable:',serialNumber);
+          }
         });
-      });
+      }else{
+        console.log('该任务没有指定设备');
+
+        availableSlave.sock.send(JSON.stringify(data));
+
+        Object.keys(cluster.workers).forEach((id) => {
+          cluster.workers[id].send({
+            message: 'dispatchSuccess',
+            data: data,
+            slave: availableSlave
+          });
+        });
+      }
     } else {
       logger.debug('no available slave to dispatch');
     }

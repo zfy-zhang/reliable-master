@@ -13,6 +13,8 @@ function *addTask() {
 
   project.time = _.moment().format('x');
 
+  project.environment = 'udid='+project.serialNumber;
+
   if (yield project.add()) {
     this.body = {
       success: true,

@@ -10,6 +10,8 @@ const logger = require('../../common/utils/logger');
 
 const Task = models.Task;
 const Project = models.Project;
+const Device = models.Device;
+
 
 module.exports = co.wrap(function *() {
   const task = new Task();
@@ -39,6 +41,7 @@ module.exports = co.wrap(function *() {
       body: body,
       taskId: taskData._id,
       type: 'task',
+      serialNumber:projectData.serialNumber,
       runiOS: projectData.runiOS
     }
   });
@@ -51,4 +54,11 @@ module.exports.success = co.wrap(function *(data, slave) {
     slaveId: slave.sysInfo.hostname,
     start_at: Date.now()
   });
+
+  //添加device锁定操作,3->使用中
+  const device = new Device();
+  yield device.updateBySerialNumber(data.serialNumber, {
+    status: global.DEVICE_STATUS.USING
+  });
+
 });

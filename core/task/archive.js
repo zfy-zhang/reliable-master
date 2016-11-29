@@ -16,6 +16,9 @@ const Task = models.Task;
 const Project = models.Project;
 const Subscribe = models.Subscribe;
 
+const Device = models.Device;
+
+
 function isUnexpectedTask(taskData) {
   try {
     var result = JSON.parse(taskData.extra);
@@ -95,6 +98,14 @@ module.exports = co.wrap(function *(data) {
 
   if (data.status === 'available') {
     yield task.findByIdAndUpdate(taskId, data);
+
+    //解除device锁定操作,1->可用
+    const device = new Device();
+    console.log('data.serialNumber',data.serialNumber);
+    yield device.updateBySerialNumber(data.serialNumber, {
+      status: global.DEVICE_STATUS.AVAILABLE
+    });
+
 
     try {
       const userEmailList = yield getUserEmailByTaskId(taskId);
