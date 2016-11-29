@@ -71,7 +71,7 @@ function *refreshAllDevicesBySlaves() {
                         console.log("查询到设备", data);
 
                         //如果设备非使用中
-                        if (data.status != data.STATUS.USING) {
+                        if (data.status != global.DEVICE_STATUS.USING) {
                             if (slaveId != data.slaveId) {
                                 data.slaveId = slaveId;
                             }
@@ -105,7 +105,6 @@ function *refreshAllDevicesBySlaves() {
 
                 //将连接成功后，又拔出的设备设置为不可用
                 var update = new Device();
-                console.log('update.STATUS.UNAVAILABLE:',global.DEVICE_STATUS.UNAVAILABLE);
                 var data = {
                     status: global.DEVICE_STATUS.UNAVAILABLE
                 };
