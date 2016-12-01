@@ -4,7 +4,7 @@ const _ = require('../../../../common/utils/helper');
 const logger = require('../../../../common/utils/logger');
 const Project = models.Project;
 
-
+// 提交任务
 function *addTask() {
   const project = new Project();
   project.repositoryUrl = _.trim(this.request.body['repositoryUrl']);
@@ -30,11 +30,22 @@ function *addTask() {
   }
 }
 
+//任务取消
+function *cancelTask(){
+   this.body = {
+      success: true,
+      errorMsg: null,
+      data: null
+    };
+}
 
 function *dispatch() {
   switch (this.params.method) {
     case 'add':
       yield addTask.call(this);
+      break;
+    case 'cancel':
+      yield cancelTask.call(this);
       break;
 
   }
