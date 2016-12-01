@@ -4,6 +4,9 @@ const auth = require('./middlewares/auth');
 const controllers = require('./controllers');
 const service = require('./middlewares/service');
 const logger = require('../common/utils/logger');
+var koaBody = require('koa-body')();
+var bodyParse =require('koa-better-body');  
+
 
 module.exports = function(app) {
   app.get('/', controllers.home);
@@ -38,5 +41,13 @@ module.exports = function(app) {
   app.post('/api/task/:method/gitlab-push.json', service.gitlabCi, controllers.api.task);
 
   app.get('/api/data', auth.user, controllers.api.data);
+
+
+  //matc
+  app.get('/api/matc/devices/:method', controllers.api.matc.devices);
+  app.post('/api/matc/jobs/:method',koaBody, controllers.api.matc.job);
+  app.post('/api/matc/result',bodyParse({multipart:true}), controllers.api.matc.result);
+  app.post('/api/matc/test',bodyParse({multipart:true}), controllers.api.matc.test);
+
   logger.debug('router set');
 };

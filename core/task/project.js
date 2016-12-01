@@ -24,13 +24,14 @@ function *createTask(data) {
 
 module.exports = co.wrap(function *() {
   const task = new Task();
-  const queueCount = yield task.getQueueCount();
-  const maxNumber = 5;
+  // 删除5个队列等待问题
+  // const queueCount = yield task.getQueueCount();
+  // const maxNumber = 5;
 
-  if (queueCount > maxNumber) {
-    logger.debug(`queue number is large than ${maxNumber}`);
-    return;
-  }
+  // if (queueCount > maxNumber) {
+  //   logger.debug(`queue number is large than ${maxNumber}`);
+  //   return;
+  // }
 
   const project = new Project();
   const projectData = yield project.getExpectedOne();

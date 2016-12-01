@@ -14,6 +14,12 @@ const defaultCfg = {
     protocol: 'http'
   },
   database: `mongodb://${mongo}/reliable`,
+  businessUrls:{
+    // 任务结束返回打包结果接口
+    jobresult:'http://localhost:3333/api/matc/test',
+    //任务开始通知修改业务系统状态接口
+    jobstart:'',
+  },
   site: {
     title: 'Reliable',
     baseurl: 'http://mac.cn:3333',
@@ -47,8 +53,8 @@ const defaultCfg = {
     sloganImage: 'https://avatars0.githubusercontent.com/u/9263042?v=3&s=200'
   },
   plugins: {
-    'reliable-plugin-dingtalk': true,
-    'reliable-plugin-slack':true
+    'reliable-plugin-dingtalk': false,
+    'reliable-plugin-slack':false
   },
   pluginTextPrefix: 'reliable-plugin'
 };
