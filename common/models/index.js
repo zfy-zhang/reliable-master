@@ -23,4 +23,5 @@ exports.Project = require('./project');
 exports.Subscribe = require('./subscribe');
 exports.Slave = require('./slave');
 exports.Device = require('./device');
+exports.Attachment = require('./attachment');
 
