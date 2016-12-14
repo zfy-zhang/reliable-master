@@ -18,7 +18,7 @@ const defaultCfg = {
     // 任务结束返回打包结果接口
     jobresult:'http://localhost:3333/api/matc/test',
     //任务开始通知修改业务系统状态接口
-    jobstart:'',
+    jobstart:'http://localhost:3333/',
   },
   site: {
     title: 'Reliable',
