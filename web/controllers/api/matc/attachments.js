@@ -12,6 +12,8 @@ function *getApp() {
     console.log("参数id:"+attachmentId);
     const attachment = new Attachment();
     const attachmentData = yield attachment.getById(attachmentId);
+    console.log("111111111111");
+    console.log(attachmentData);
     var filepath = attachmentData.attachmentAppPath;
     var fileName = attachmentData.attachmentAppName;
     var fileSrc = path.join(filepath,fileName);

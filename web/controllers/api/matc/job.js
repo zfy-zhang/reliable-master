@@ -37,8 +37,6 @@ console.log("xiaoming1231111111111111111111111");
   const attachment = new Attachment();
 
   if (yield project.add()) {
-    // var apkurl = "http://192.1.1.7:9090/demo/services/wsdevice/app/17";
-    // var scriptUrl = "http://192.1.1.7:9090/demo/services/wsdevice/script/12";
     co(function* () {
       console.log(project.apkUrl);
       var appResult = yield REQUST.get({ url: project.apkUrl+'.md5sum'});
@@ -52,7 +50,6 @@ console.log("xiaoming1231111111111111111111111");
         _.mkdir(tempDir);
       }
       var appDir = tempDir+"\\app\\"+requestBody;
-      console.log(requestBody);
 
       /**
         * 获取脚本文件信息，并且下载脚本文件
