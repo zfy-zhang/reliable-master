@@ -49,7 +49,8 @@ module.exports = co.wrap(function* () {
       type: 'task',
       serialNumber: projectData.serialNumber,
       runiOS: projectData.runiOS,
-      attachmentId:attachmentData._id
+      attachmentId:attachmentData._id,
+      masterLocal:options.businessUrls.upresult
     }
   });
 });
