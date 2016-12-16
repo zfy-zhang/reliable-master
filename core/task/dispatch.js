@@ -50,7 +50,7 @@ module.exports = co.wrap(function* () {
       serialNumber: projectData.serialNumber,
       runiOS: projectData.runiOS,
       attachmentId:attachmentData._id,
-      masterLocal:options.businessUrls.upResult
+      masterLocal:options.businessUrls.upresult
     }
   });
 });
