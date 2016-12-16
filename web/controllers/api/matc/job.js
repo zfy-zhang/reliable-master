@@ -14,6 +14,9 @@ const Project = models.Project;
 const Attachment = models.Attachment;
 // 提交任务
 function *addTask() {
+
+console.log("xiaoming1231111111111111111111111");
+
   const project = new Project();
 //  project.repositoryUrl = _.trim(this.request.body['repositoryUrl']);
   project.repositoryUrl = 'https://github.com/xiaomingstudy/macaca-test-sample.git';
@@ -47,6 +50,7 @@ function *addTask() {
         _.mkdir(tempDir);
       }
       var appDir = tempDir+"\\app\\"+requestBody;
+
       /**
         * 获取脚本文件信息，并且下载脚本文件
         */
