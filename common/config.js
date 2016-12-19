@@ -21,6 +21,7 @@ const defaultCfg = {
     jobstart:'http://192.1.1.7:9090/demo/services/wsdevice/status/',
     //slave上传脚本路径
     upresult:'http://localhost:3333/api/matc/result',
+
   },
   site: {
     title: 'Reliable',
