@@ -46,7 +46,8 @@ function *addTask() {
       if (!fs.existsSync(tempDir)) {
         _.mkdir(tempDir);
       }
-      var appDir = tempDir+"\\app\\"+requestBody;
+      var appDir = path.join(tempDir,"app",requestBody);
+
       /**
         * 获取脚本文件信息，并且下载脚本文件
         */
@@ -56,11 +57,12 @@ function *addTask() {
       var scriptNames = scriptResult.headers['content-disposition'].split('\'')[1];
       var scriptName = scriptNames.substring(0,scriptNames.lastIndexOf("\."))
       console.log(scriptName);
-      var scriptDir =tempDir+"\\script\\"+scriptRequestBody;
+      var scriptDir = path.join(tempDir,"script",scriptRequestBody);
+      var thisScript =  path.join(scriptDir,scriptName);
       if (!fs.existsSync(scriptDir)) {
         _.mkdir(scriptDir);
         request(project.scriptUrl).pipe(
-              fs.createWriteStream(scriptDir+"\\"+scriptName)
+              fs.createWriteStream(thisScript)
             );
 
         attachment.attachmentScriptPath=scriptDir;
@@ -72,8 +74,9 @@ function *addTask() {
       attachment.projectId = project._id;
       if (!fs.existsSync(appDir)) {
         _.mkdir(appDir);
+        var thisApp = path.join(appDir,appName);
         request(project.apkUrl).pipe(
-              fs.createWriteStream(appDir+"\\"+appName)
+              fs.createWriteStream(thisApp)
             );
         attachment.attachmentAppPath=appDir;
         attachment.attachmentAppName=appName;
