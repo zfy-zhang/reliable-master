@@ -14,9 +14,6 @@ const Project = models.Project;
 const Attachment = models.Attachment;
 // 提交任务
 function *addTask() {
-
-console.log("xiaoming1231111111111111111111111");
-
   const project = new Project();
 //  project.repositoryUrl = _.trim(this.request.body['repositoryUrl']);
   project.repositoryUrl = 'https://github.com/xiaomingstudy/macaca-test-sample.git';
@@ -49,7 +46,7 @@ console.log("xiaoming1231111111111111111111111");
       if (!fs.existsSync(tempDir)) {
         _.mkdir(tempDir);
       }
-      var appDir = tempDir+"\\app\\"+requestBody;
+      var appDir = path.join(tempDir,"app",requestBody);
 
       /**
         * 获取脚本文件信息，并且下载脚本文件
@@ -58,13 +55,14 @@ console.log("xiaoming1231111111111111111111111");
       var scriptResult = yield REQUST.get({ url: project.scriptUrl+'.md5sum'});
       var scriptRequestBody = scriptResult.body;
       var scriptNames = scriptResult.headers['content-disposition'].split('\'')[1];
-      var scriptName = scriptNames.substring(0,appNames.lastIndexOf("\."))
+      var scriptName = scriptNames.substring(0,scriptNames.lastIndexOf("\."))
       console.log(scriptName);
-      var scriptDir =tempDir+"\\script\\"+scriptRequestBody;
+      var scriptDir = path.join(tempDir,"script",scriptRequestBody);
+      var thisScript =  path.join(scriptDir,scriptName);
       if (!fs.existsSync(scriptDir)) {
         _.mkdir(scriptDir);
         request(project.scriptUrl).pipe(
-              fs.createWriteStream(scriptDir+"\\"+scriptName)
+              fs.createWriteStream(thisScript)
             );
 
         attachment.attachmentScriptPath=scriptDir;
@@ -76,8 +74,9 @@ console.log("xiaoming1231111111111111111111111");
       attachment.projectId = project._id;
       if (!fs.existsSync(appDir)) {
         _.mkdir(appDir);
+        var thisApp = path.join(appDir,appName);
         request(project.apkUrl).pipe(
-              fs.createWriteStream(appDir+"\\"+appName)
+              fs.createWriteStream(thisApp)
             );
         attachment.attachmentAppPath=appDir;
         attachment.attachmentAppName=appName;
