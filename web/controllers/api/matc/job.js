@@ -14,9 +14,6 @@ const Project = models.Project;
 const Attachment = models.Attachment;
 // 提交任务
 function *addTask() {
-
-console.log("xiaoming1231111111111111111111111");
-
   const project = new Project();
 //  project.repositoryUrl = _.trim(this.request.body['repositoryUrl']);
   project.repositoryUrl = 'https://github.com/xiaomingstudy/macaca-test-sample.git';
@@ -50,7 +47,6 @@ console.log("xiaoming1231111111111111111111111");
         _.mkdir(tempDir);
       }
       var appDir = tempDir+"\\app\\"+requestBody;
-
       /**
         * 获取脚本文件信息，并且下载脚本文件
         */
@@ -58,7 +54,7 @@ console.log("xiaoming1231111111111111111111111");
       var scriptResult = yield REQUST.get({ url: project.scriptUrl+'.md5sum'});
       var scriptRequestBody = scriptResult.body;
       var scriptNames = scriptResult.headers['content-disposition'].split('\'')[1];
-      var scriptName = scriptNames.substring(0,appNames.lastIndexOf("\."))
+      var scriptName = scriptNames.substring(0,scriptNames.lastIndexOf("\."))
       console.log(scriptName);
       var scriptDir =tempDir+"\\script\\"+scriptRequestBody;
       if (!fs.existsSync(scriptDir)) {
