@@ -164,8 +164,76 @@ function *querySlaveDeviceByUrl(url) {
         return false;
     }
 }
+function *deleteDevices(){
+    var deviceId = this.params.deviceId;
+    var device = new Device();
+    if (yield device.removeById(deviceId)){
+        this.body = {
+            success: true,
+            errorMsg: '删除设备成功',
+            data: null
+        };
+    } else {
+        this.body = {
+            success: false,
+            errorMsg: '删除设备失败',
+            data: null
+        };
+    }
+}
 
-
+function *controlDevices() {
+    switch (this.params.control) {
+        case 'run':
+            yield runDevices.call(this);
+            break;
+        case 'stop':
+             yield stopDevices.call(this);
+            break;
+        case 'delete':
+            yield deleteDevices.call(this);
+            break;
+    }
+}
+function *runDevices() {
+    var deviceId = this.params.deviceId;
+    var device = new Device();
+    var data = yield device.getById(deviceId);
+    data.status = global.DEVICE_STATUS.USING;
+    if (yield device.updateById(deviceId,data)){
+        this.body = {
+            success: true,
+            errorMsg: '启用设备成功',
+            data: null
+        };
+    } else {
+        this.body = {
+            success: false,
+            errorMsg: '启用设备失败',
+            data: null
+        };
+    }
+}
+//停止设备
+function *stopDevices() {
+    var deviceId = this.params.deviceId;
+    var device = new Device();
+    var data = yield device.getById(deviceId);
+    data.status = global.DEVICE_STATUS.AVAILABLE;
+    if (yield device.updateById(deviceId,data)){
+        this.body = {
+            success: true,
+            errorMsg: '停止设备成功',
+            data: null
+        };
+    } else {
+        this.body = {
+            success: false,
+            errorMsg: '停止设备失败',
+            data: null
+        };
+    }
+}
 function *dispatch() {
 
     switch (this.params.method) {
@@ -176,6 +244,9 @@ function *dispatch() {
         //查询有效设备
         case 'devices':
             this.body = yield queryValidDevices.call(this);
+            break;
+        case 'control_devices':
+            this.body = yield controlDevices.call(this);
             break;
     }
 
