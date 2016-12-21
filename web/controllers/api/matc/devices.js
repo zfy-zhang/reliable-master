@@ -96,6 +96,7 @@ function *refreshAllDevicesBySlaves() {
                         var arrays = screen.split("x");
                         device.screenWidth = arrays[0];
                         device.screenHeight = arrays[1];
+                        device.plantForm = slaveDevice.plantForm;
 
                         device.errorMessage = slaveDevice.errorMessage;
                         yield device.add();
