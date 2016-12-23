@@ -15,13 +15,13 @@ const Attachment = models.Attachment;
 // 提交任务
 function *addTask() {
   const project = new Project();
-//  project.repositoryUrl = _.trim(this.request.body['repositoryUrl']);
-  project.repositoryUrl = 'https://github.com/xiaomingstudy/macaca-test-sample.git';
+  project.repositoryUrl = _.trim(this.request.body['repositoryUrl']);
+//   project.repositoryUrl = 'https://github.com/xiaomingstudy/macaca-test-sample.git';
+//
+  project.repositoryBranch = _.trim(this.request.body['repositoryBranch']);
+//   project.repositoryBranch = 'master';
+  project.serialNumber = _.trim(this.request.body['serialNumber']);
 
-  //project.repositoryBranch = _.trim(this.request.body['repositoryBranch']);
-  project.repositoryBranch = 'master';
-  // project.serialNumber = _.trim(this.request.body['serialNumber']);
-  project.serialNumber ='PBV0216706008526';
   project.resultUrl = _.trim(this.request.body['result_url']);
   project.scriptUrl = _.trim(this.request.body['script_url']);
   project.apkUrl = _.trim(this.request.body['app_url']);
