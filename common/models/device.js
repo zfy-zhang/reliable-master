@@ -40,7 +40,12 @@ const Devicechema = new Schema({
         type: String
     },
 
-
+    /**
+     * 设备系统
+     */
+    plantForm: {
+        type: String
+    },
     /**
      * 设备厂商
      */
