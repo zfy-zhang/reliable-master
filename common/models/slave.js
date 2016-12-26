@@ -11,103 +11,117 @@ const PAGE_SIZE = 10;
 // slave table schema
 const Slavechema = new Schema({
 
-  /**
-   * slave url
-   */
-  slaveUrl: {
-    type: String
-  },
+    /**
+     *slaveUrl=slaveIp:slavePort
+     */
+    slaveUrl: {
+        type: String
+    },
 
-  /**
-   * 设备状态
-   * 1 - > 可用
-   * 2 - > 不可用
-   */
+    /**
+     * slave ip
+     */
+    slaveIp: {
+        type: String
+    },
 
-  status: {
-    type: Number,
-    default: 1
-  },
+    /**
+     * slave port
+     */
+    slavePort: {
+        type: String
+    },
 
-  /**
-   * 错误信息
-   */
-  errorMessage: {
-    type: String
-  },
+    /**
+     * 设备状态
+     * 1 - > 可用
+     * 2 - > 不可用
+     */
+
+    status: {
+        type: Number,
+        default: 1
+    },
+
+    /**
+     * 错误信息
+     */
+    errorMessage: {
+        type: String
+    },
 
 
-  /**
-   * 接入时间
-   */
+    /**
+     * 接入时间
+     */
 
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
+    created_at: {
+        type: Date,
+        default: Date.now
+    },
 
-  /**
-   * 更新时间
-   */
+    /**
+     * 更新时间
+     */
 
-  updated_at: {
-    type: Date,
-    default: Date.now
-  },
+    updated_at: {
+        type: Date,
+        default: Date.now
+    },
 
 });
 
 Slavechema.index({
-  _id: 1,
-  create_date: -1
+    _id: 1,
+    create_date: -1
 });
 
-Slavechema.methods.add = function() {
-  const promise = new P();
+Slavechema.methods.add = function () {
+    const promise = new P();
 
-  this.save((error, data) => {
+    this.save((error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
-Slavechema.methods.removeById = function(id) {
-  const promise = new P();
+Slavechema.methods.removeById = function (id) {
+    const promise = new P();
 
-  Slave.remove({
-    _id: id
-  }, (error, data) => {
+    Slave.remove({
+        _id: id
+    }, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
-Slavechema.methods.updateById = function(id, data) {
-  const promise = new P();
+Slavechema.methods.updateById = function (id, data) {
+    const promise = new P();
 
-  Slave.update({
-    _id: id
-  }, data, {
-    upsert: true
-  }, (error, data) => {
+    Slave.update({
+        _id: id
+    }, data, {
+        upsert: true
+    }, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
 /**
@@ -117,119 +131,117 @@ Slavechema.methods.updateById = function(id, data) {
  * @param data
  * @returns {*}
  */
-Slavechema.methods.updateByStatus = function(data) {
-  const promise = new P();
+Slavechema.methods.updateByStatus = function (data) {
+    const promise = new P();
 
-  Slave.update({
-    status:1
-  }, data, {
-    upsert: false
-  }, (error, data) => {
+    Slave.update({
+        status: 1
+    }, data, {
+        upsert: false
+    }, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
-Slavechema.methods.getById = function(id) {
-  const promise = new P();
+Slavechema.methods.getById = function (id) {
+    const promise = new P();
 
-  Slave.findOne({
-    _id: id
-  }, (error, data) => {
+    Slave.findOne({
+        _id: id
+    }, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
-Slavechema.methods.getByUrl = function(url) {
-  const promise = new P();
+Slavechema.methods.getByUrl = function (url) {
+    const promise = new P();
 
-  Slave.findOne({
-    slaveUrl: url
-  }, (error, data) => {
+    Slave.findOne({
+        slaveUrl: url
+    }, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
 
-Slavechema.methods.getAll = function(page) {
-  const _page = parseInt(page, 10) || 1;
-  const promise = new P();
+Slavechema.methods.getAll = function (page) {
+    const _page = parseInt(page, 10) || 1;
+    const promise = new P();
 
-  Slave.find({
-  }, null, {
-    skip: PAGE_SIZE * (_page - 1),
-    sort: {
-      _id: -1
-    },
-    limit: PAGE_SIZE || Infinity
-  }, (error, data) => {
+    Slave.find({}, null, {
+        skip: PAGE_SIZE * (_page - 1),
+        sort: {
+            _id: -1
+        },
+        limit: PAGE_SIZE || Infinity
+    }, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
-Slavechema.methods.getTotalCount = function() {
-  const promise = new P();
+Slavechema.methods.getTotalCount = function () {
+    const promise = new P();
 
-  Slave.count({
-  }, (error, data) => {
+    Slave.count({}, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
-Slavechema.methods.getExpectedOne = function() {
-  const promise = new P();
+Slavechema.methods.getExpectedOne = function () {
+    const promise = new P();
 
-  Slave.findOne({
-    status: 0,
-    time: {
-      $lte: Date.now()
-    }
-  }, (error, data) => {
+    Slave.findOne({
+        status: 0,
+        time: {
+            $lte: Date.now()
+        }
+    }, (error, data) => {
 
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(null, data);
-    }
-  });
-  return promise;
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(null, data);
+        }
+    });
+    return promise;
 };
 
-Slavechema.virtual('created_date').get(function() {
-  return _.moment(this.created_at).format('YYYY-MM-DD HH:mm:ss');
+Slavechema.virtual('created_date').get(function () {
+    return _.moment(this.created_at).format('YYYY-MM-DD HH:mm:ss');
 });
 
-Slavechema.virtual('updated_date').get(function() {
-  return _.moment(this.updated_at).format('YYYY-MM-DD HH:mm:ss');
+Slavechema.virtual('updated_date').get(function () {
+    return _.moment(this.updated_at).format('YYYY-MM-DD HH:mm:ss');
 });
 
 
