@@ -98,31 +98,10 @@ function *refreshAllDevicesBySlaves() {
                             var arrays = screen.split("x");
                             device.screenWidth = arrays[0];
                             device.screenHeight = arrays[1];
-
+                            device.plantForm = slaveDevice.plantForm;
                             device.errorMessage = slaveDevice.errorMessage;
                             yield device.add();
                         }
-                    } else {
-                        console.log("未查询到设备");
-
-                        console.log(slaveDevice);
-                        device.slaveId = slaveId;
-                        device.serialNumber = serialNumber;
-                        device.status = slaveDevice.status;
-                        device.brand = slaveDevice.brand;
-                        device.model = slaveDevice.model;
-                        device.releaseVersion = slaveDevice.releaseVersion;
-                        device.sdkVersion = slaveDevice.sdkVersion;
-                        device.abi = slaveDevice.abi;
-                        var screen = slaveDevice.screen;
-                        var arrays = screen.split("x");
-                        device.screenWidth = arrays[0];
-                        device.screenHeight = arrays[1];
-                        device.plantForm = slaveDevice.plantForm;
-
-                        device.errorMessage = slaveDevice.errorMessage;
-                        yield device.add();
-
                     }
 
                     //将连接成功后，又拔出的设备设置为不可用
