@@ -94,7 +94,6 @@ function *refreshAllDevicesBySlaves() {
                             device.releaseVersion = slaveDevice.releaseVersion;
                             device.sdkVersion = slaveDevice.sdkVersion;
                             device.abi = slaveDevice.abi;
-                            device.slaveIP = ip;
                             var screen = slaveDevice.screen;
                             var arrays = screen.split("x");
                             device.screenWidth = arrays[0];
@@ -148,6 +147,13 @@ function *refreshAllDevicesBySlaves() {
 function *queryValidDevices() {
     var device = new Device();
     var result = yield device.queryValidDevices();
+    for (var i = 0; i < result.length; i++) {
+        var slaveInfo = new Slave();
+        var deviceInfo = result[i];
+        var slaveId = deviceInfo.slaveId;
+        var slaveResult = yield slaveInfo.getById(slaveId);
+        deviceInfo.slaveIP = slaveResult.slaveIp;
+    }
     return result;
 }
 
