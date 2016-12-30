@@ -257,6 +257,28 @@ function *stopDevices() {
     var data = yield device.getById(deviceId);
     data.status = global.DEVICE_STATUS.AVAILABLE;
     if (yield device.updateById(deviceId, data)) {
+
+        var slave = new Slave();
+        var slaveData = yield slave.getById(data.slaveId);
+
+        try {
+            var result = yield request({
+                uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/stop',
+                form: {
+                    serialNumber: data.serialNumber
+                },
+                method: 'post'
+            });
+            this.body = result.body;
+        } catch (e) {
+            console.log(e);
+            this.body = {
+                success: false,
+                errorMsg: '停止设备失败',
+                data: null
+            };
+        }
+
         this.body = {
             success: true,
             errorMsg: '停止设备成功',
