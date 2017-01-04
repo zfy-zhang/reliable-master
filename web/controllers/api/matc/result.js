@@ -55,6 +55,7 @@ function* result() {
       data: null
     };
   } catch (ex) {
+    console.log(ex);
     this.body = {
       success: false,
       errorMsg: 'slave上传结果失败',
