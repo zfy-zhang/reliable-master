@@ -11,6 +11,7 @@ let REQUST = require("co-request");
 var path = require('path');
 
 const Project = models.Project;
+const Device = models.Device;
 const Attachment = models.Attachment;
 // 提交任务
 function *addTask() {
@@ -20,7 +21,11 @@ function *addTask() {
 //
   project.repositoryBranch = _.trim(this.request.body['repositoryBranch']);
 //   project.repositoryBranch = 'master';
-  project.serialNumber = _.trim(this.request.body['serialNumber']);
+  var deviceId = _.trim(this.request.body['device_id']);
+  const device = new Device();
+  var devices = yield device.getById(deviceId);
+
+  project.serialNumber = devices.serialNumber;
 
   project.resultUrl = _.trim(this.request.body['result_url']);
   project.scriptUrl = _.trim(this.request.body['script_url']);
