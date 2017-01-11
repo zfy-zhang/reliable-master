@@ -145,16 +145,22 @@ function *refreshAllDevicesBySlaves() {
  * 查询当前有效的设备
  */
 function *queryValidDevices() {
-    var device = new Device();
-    var result = yield device.queryValidDevices();
-    for (var i = 0; i < result.length; i++) {
-        var slaveInfo = new Slave();
-        var deviceInfo = result[i];
-        var slaveId = deviceInfo.slaveId;
-        var slaveResult = yield slaveInfo.getById(slaveId);
-        deviceInfo.slaveIP = slaveResult.slaveIp;
+    try {
+        var device = new Device();
+        var result = yield device.queryValidDevices();
+        for (var i = 0; i < result.length; i++) {
+            var slaveInfo = new Slave();
+            var deviceInfo = result[i];
+            var slaveId = deviceInfo.slaveId;
+            var slaveResult = yield slaveInfo.getById(slaveId);
+            deviceInfo.slaveIP = slaveResult.slaveIp;
+        }
+        return result;
+    }catch (e){
+        console.log(e);
+        return null;
     }
-    return result;
+
 }
 
 /**
@@ -163,13 +169,11 @@ function *queryValidDevices() {
  * @returns {*}
  */
 function *requestByUrl(url) {
-
-    var result = yield request({
-        uri: url,
-        method: 'get'
-    });
-
     try {
+        var result = yield request({
+            uri: url,
+            method: 'get'
+        });
         result = JSON.parse(result.body);
         return result;
     } catch (e) {
@@ -177,21 +181,31 @@ function *requestByUrl(url) {
     }
 }
 function *deleteDevices() {
-    var deviceId = this.params.deviceId;
-    var device = new Device();
-    if (yield device.removeById(deviceId)) {
-        this.body = {
-            success: true,
-            errorMsg: '删除设备成功',
-            data: null
-        };
-    } else {
+    try {
+        var deviceId = this.params.deviceId;
+        var device = new Device();
+        if (yield device.removeById(deviceId)) {
+            this.body = {
+                success: true,
+                errorMsg: '删除设备成功',
+                data: null
+            };
+        } else {
+            this.body = {
+                success: false,
+                errorMsg: '删除设备失败',
+                data: null
+            };
+        }
+    }catch (e){
+        console.log(e);
         this.body = {
             success: false,
             errorMsg: '删除设备失败',
             data: null
         };
     }
+
 }
 
 function *controlDevices() {
@@ -208,89 +222,109 @@ function *controlDevices() {
     }
 }
 function *runDevices() {
-    var deviceId = this.params.deviceId;
-    var device = new Device();
-    var data = yield device.getById(deviceId);
-    data.status = global.DEVICE_STATUS.USING;
+    try{
+        var deviceId = this.params.deviceId;
+        var device = new Device();
+        var data = yield device.getById(deviceId);
+        data.status = global.DEVICE_STATUS.USING;
 
-    if (yield device.updateById(deviceId, data)) {
+        if (yield device.updateById(deviceId, data)) {
 
-        var display = data.screenWidth + 'x' + data.screenHeight;
+            var display = data.screenWidth + 'x' + data.screenHeight;
 
-        var slave = new Slave();
-        var slaveData = yield slave.getById(data.slaveId);
+            var slave = new Slave();
+            var slaveData = yield slave.getById(data.slaveId);
 
-        try {
-            var result = yield request({
-                uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/run',
-                form: {
-                    display: data.screenWidth + 'x' + data.screenHeight,
-                    serialNumber: data.serialNumber
-                },
-                method: 'post'
-            });
-            this.body = result.body;
-        } catch (e) {
-            console.log(e);
+            try {
+                var result = yield request({
+                    uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/run',
+                    form: {
+                        display: data.screenWidth + 'x' + data.screenHeight,
+                        serialNumber: data.serialNumber
+                    },
+                    method: 'post'
+                });
+                this.body = result.body;
+            } catch (e) {
+                console.log(e);
+                this.body = {
+                    success: false,
+                    errorMsg: '启用设备失败',
+                    data: null
+                };
+            }
+
+
+        } else {
             this.body = {
                 success: false,
                 errorMsg: '启用设备失败',
                 data: null
             };
         }
-
-
-    } else {
+    }catch (e){
+        console.log(e);
         this.body = {
             success: false,
             errorMsg: '启用设备失败',
             data: null
         };
     }
+
 }
 
 
 //停止设备
 function *stopDevices() {
-    var deviceId = this.params.deviceId;
-    var device = new Device();
-    var data = yield device.getById(deviceId);
-    data.status = global.DEVICE_STATUS.AVAILABLE;
-    if (yield device.updateById(deviceId, data)) {
+    try{
+        var deviceId = this.params.deviceId;
+        var device = new Device();
+        var data = yield device.getById(deviceId);
+        data.status = global.DEVICE_STATUS.AVAILABLE;
+        if (yield device.updateById(deviceId, data)) {
 
-        var slave = new Slave();
-        var slaveData = yield slave.getById(data.slaveId);
+            var slave = new Slave();
+            var slaveData = yield slave.getById(data.slaveId);
 
-        try {
-            var result = yield request({
-                uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/stop',
-                form: {
-                    serialNumber: data.serialNumber
-                },
-                method: 'post'
-            });
-            this.body = result.body;
-        } catch (e) {
-            console.log(e);
+            try {
+                var result = yield request({
+                    uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/stop',
+                    form: {
+                        serialNumber: data.serialNumber
+                    },
+                    method: 'post'
+                });
+                this.body = result.body;
+            } catch (e) {
+                console.log(e);
+                this.body = {
+                    success: false,
+                    errorMsg: '停止设备失败',
+                    data: null
+                };
+            }
+
+            this.body = {
+                success: true,
+                errorMsg: '停止设备成功',
+                data: null
+            };
+        } else {
             this.body = {
                 success: false,
                 errorMsg: '停止设备失败',
                 data: null
             };
         }
-
-        this.body = {
-            success: true,
-            errorMsg: '停止设备成功',
-            data: null
-        };
-    } else {
+    }catch (e){
+        console.log(e);
         this.body = {
             success: false,
             errorMsg: '停止设备失败',
             data: null
         };
     }
+
 }
 function *dispatch() {
 
