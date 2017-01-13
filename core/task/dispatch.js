@@ -8,6 +8,7 @@ const models = require('../../common/models');
 const _ = require('../../common/utils/helper');
 const logger = require('../../common/utils/logger');
 const options = require('../../common/config').get();
+var request = require('request');
 let REQUST = require("co-request");
 
 const Task = models.Task;
@@ -71,18 +72,13 @@ module.exports = co.wrap(function*() {
  * 通知业务系统任务开始
  */
 function* jobstart(projectId) {
-    const project = new Project();
-    const projectData = yield project.getById(projectId);
-    co(function*() {
-        console.log(projectData);
-        var result = yield REQUST.get({url: projectData.statusUrl + projectId + "?status=running"});
-        result = yield JSON.parse(result.body);
-        return result;
-
-    }).catch(function (err) {
-        console.error(err);
-    });
-
+    try{
+        const project = new Project();
+        const projectData = yield project.getById(projectId);
+        request.post({url: projectData.statusUrl + projectId + "/running"});
+    }catch(ex){
+        console.log(ex);
+    }
 }
 
 module.exports.success = co.wrap(function*(data, slave) {
