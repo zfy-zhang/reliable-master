@@ -240,7 +240,8 @@ function *runDevices() {
                     uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/run',
                     form: {
                         display: data.screenWidth + 'x' + data.screenHeight,
-                        serialNumber: data.serialNumber
+                        serialNumber: data.serialNumber,
+                        plantForm:data.plantForm
                     },
                     method: 'post'
                 });
