@@ -219,9 +219,21 @@ function *controlDevices() {
         case 'delete':
             yield deleteDevices.call(this);
             break;
+        case 'record':
+            yield recordDevices.call(this);
+            break;
     }
 }
-function *runDevices() {
+
+function *runDevices(){
+    yield runOrRecordDevices.call(this,false);
+}
+
+function *recordDevices(){
+    yield runOrRecordDevices.call(this,true);
+}
+
+function *runOrRecordDevices(isRecord) {
     try{
         var deviceId = this.params.deviceId;
         var device = new Device();
@@ -235,9 +247,16 @@ function *runDevices() {
             var slave = new Slave();
             var slaveData = yield slave.getById(data.slaveId);
 
+            var url = slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/run';
+
+            console.log(isRecord);
+            if(isRecord){
+                url = slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/record';
+            }
+
             try {
                 var result = yield request({
-                    uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/run',
+                    uri: url ,
                     form: {
                         display: data.screenWidth + 'x' + data.screenHeight,
                         serialNumber: data.serialNumber,
