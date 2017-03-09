@@ -12,6 +12,7 @@ const logger = require('../../common/utils/logger');
 const models = require('../../common/models');
 
 const Device = models.Device;
+const Slave = models.Slave;
 
 const STATUS = {
     AVAILABLE: 'available',
@@ -28,6 +29,56 @@ class Manager {
     init() {
         this.monitor();
         _.setArchiveConfig('slaves', this.slaves);
+    }
+    /**
+      在slave连接上的时候去注册并保存slave到数据库
+    */
+    saveSlave(){
+      co(function*() {
+        try {
+          //body...
+          var redisSlaves = yield _.getArchiveConfig('slaves');
+
+          if (Object.keys(redisSlaves || {}).length != 0) {
+
+              var result = [];
+
+              redisSlaves = _.values(redisSlaves);
+
+              for (var i = 0; i < redisSlaves.length; i++) {
+
+                  var redisSlave = redisSlaves[i];
+
+                  var ip = redisSlave.ip;
+                  var webPort = redisSlave.webPort;
+
+                  var slaveUrl = `http://${ip}:${webPort}`;
+
+                  //查询数据库中是否已经保存过该slave
+                  var slave = new Slave();
+                  const dbSlave = yield slave.getByUrl(slaveUrl);
+
+                  var slaveId;
+                  //如果没有保存过，则将slave保存到数据库
+                  if (dbSlave == null) {
+
+                      slave.slaveUrl = slaveUrl;
+                      slave.slaveIp = ip;
+                      slave.slavePort = webPort;
+                      yield slave.add();
+                  } else {
+                      dbSlave.status = 1;
+                      dbSlave.updateById(slaveId, dbSlave);
+                  }
+                }
+              }else {
+                
+              }
+        } catch (err) {
+          console.log(err);
+        }
+
+        });
     }
 
     bind(data) {

@@ -40,6 +40,7 @@ exports.init = function() {
             }
 
             process.slaveManager.bind(data);
+            process.slaveManager.saveSlave();
             break;
           case 'dispatchTask':
             process.slaveManager.dispatch(e.data);
