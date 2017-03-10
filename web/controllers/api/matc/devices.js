@@ -1,9 +1,7 @@
 'use strict';
 var request = require('../../../../common/utils/request');
 var helper = require('../../../../common/utils/helper');
-var co = require('co');
 const models = require('../../../../common/models');
-
 const Device = models.Device;
 const Slave = models.Slave;
 
@@ -14,125 +12,132 @@ const Slave = models.Slave;
  */
 function *refreshAllDevicesBySlaves() {
 
-    //获取redis中的slaves缓存
-    var redisSlaves = yield helper.getArchiveConfig('slaves');
+    try {
 
-    if (Object.keys(redisSlaves || {}).length != 0) {
+        //获取redis中的slaves缓存
+        var redisSlaves = yield helper.getArchiveConfig('slaves');
 
-        var result = [];
+        if (Object.keys(redisSlaves || {}).length != 0) {
 
-        redisSlaves = helper.values(redisSlaves);
+            var result = [];
 
-        for (var i = 0; i < redisSlaves.length; i++) {
+            redisSlaves = helper.values(redisSlaves);
 
-            var redisSlave = redisSlaves[i];
+            for (var i = 0; i < redisSlaves.length; i++) {
 
-            var ip = redisSlave.ip;
-            var webPort = redisSlave.webPort;
+                var redisSlave = redisSlaves[i];
 
-            var url = `http://${ip}:${webPort}/devices`;
+                var ip = redisSlave.ip;
+                var webPort = redisSlave.webPort;
 
-            //查询数据库中是否已经保存过该slave
-            var slave = new Slave();
-            const dbSlave = yield slave.getByUrl(url);
+                var slaveUrl = `http://${ip}:${webPort}`;
 
-            var slaveId;
-            //如果没有保存过，则将slave保存到数据库
-            if (dbSlave == null) {
-                slave.slaveUrl = url;
-                yield slave.add();
-                slaveId = slave._id
-            } else {
-                slaveId = dbSlave._id;
-                dbSlave.status = 1;
-                dbSlave.updateById(slaveId,dbSlave);
-            }
+                //查询数据库中是否已经保存过该slave
+                var slave = new Slave();
+                const dbSlave = yield slave.getByUrl(slaveUrl);
 
-            // 查询该slave节点上的所有设备
-            var slaveDevices = yield querySlaveDeviceByUrl(url);
-
-            if (slaveDevices) {
-
-                result.push(slaveDevices);
-
-                var slaveDevicesSerialNumbers = [];
-                //循环遍历设备
-                for (var i = 0; i < slaveDevices.length; i++) {
-                    var slaveDevice = slaveDevices[i];
-                    var serialNumber = slaveDevice.serialNumber;
-                    slaveDevicesSerialNumbers.push(serialNumber);
-                    var device = new Device();
-
-                    //根据序列号查询数据库中是否存在该设备
-                    const data = yield device.getBySerialNumber(serialNumber);
-
-                    //如果存在，检查库中该设备原先是否挂靠在相同slave上，如果不是，则修改关联关系
-                    if (data != null) {
-                        console.log("查询到设备", data);
-
-                        //如果设备非使用中
-                        if (data.status != global.DEVICE_STATUS.USING) {
-                            if (slaveId != data.slaveId) {
-                                data.slaveId = slaveId;
-                            }
-                            data.status = slaveDevice.status;
-                            data.updated_at = Date.now();
-
-                            yield device.updateById(data._id, data);
-                        }
-                    } else {
-                        console.log("未查询到设备");
-
-                        console.log(slaveDevice);
-                        device.slaveId = slaveId;
-                        device.serialNumber = serialNumber;
-                        device.status = slaveDevice.status;
-                        device.brand = slaveDevice.brand;
-                        device.model = slaveDevice.model;
-                        device.releaseVersion = slaveDevice.releaseVersion;
-                        device.sdkVersion = slaveDevice.sdkVersion;
-                        device.abi = slaveDevice.abi;
-                        var screen = slaveDevice.screen;
-                        var arrays = screen.split("x");
-                        device.screenWidth = arrays[0];
-                        device.screenHeight = arrays[1];
-
-                        device.errorMessage = slaveDevice.errorMessage;
-                        yield device.add();
-
-                    }
+                var slaveId;
+                //如果没有保存过，则将slave保存到数据库
+                if (dbSlave == null) {
+                    slave.slaveUrl = slaveUrl;
+                    slave.slaveIp = ip;
+                    slave.slavePort = webPort;
+                    yield slave.add();
+                    slaveId = slave._id;
+                } else {
+                    slaveId = dbSlave._id;
+                    dbSlave.status = 1;
+                    dbSlave.updateById(slaveId, dbSlave);
                 }
 
-                //将连接成功后，又拔出的设备设置为不可用
-                var update = new Device();
-                var data = {
-                    status: global.DEVICE_STATUS.UNAVAILABLE
-                };
+                var url = slaveUrl + '/devices';
+                // 查询该slave节点上的所有设备
+                var slaveDevices = yield requestByUrl(url);
 
-                yield update.updateBySlaveId(slaveId, slaveDevicesSerialNumbers, data);
+                if (slaveDevices) {
+                    result.push(slaveDevices);
+
+                    var slaveDevicesSerialNumbers = [];
+                    //循环遍历设备
+                    for (var i = 0; i < slaveDevices.length; i++) {
+                        var slaveDevice = slaveDevices[i];
+                        var serialNumber = slaveDevice.serialNumber;
+                        slaveDevicesSerialNumbers.push(serialNumber);
+                        var device = new Device();
+
+                        //根据序列号查询数据库中是否存在该设备
+                        const data = yield device.getBySerialNumber(serialNumber);
+
+                        //如果存在，检查库中该设备原先是否挂靠在相同slave上，如果不是，则修改关联关系
+                        if (data != null) {
+                            console.log("查询到设备", data);
+
+                            //如果设备非使用中
+                            if (data.status != global.DEVICE_STATUS.USING) {
+                                if (slaveId != data.slaveId) {
+                                    data.slaveId = slaveId;
+                                }
+                                data.status = slaveDevice.status;
+                                data.updated_at = Date.now();
+
+                                yield device.updateById(data._id, data);
+                            }
+                        } else {
+                            console.log("未查询到设备");
+
+                            console.log(slaveDevice);
+                            device.slaveId = slaveId;
+                            device.serialNumber = serialNumber;
+                            device.status = slaveDevice.status;
+                            device.brand = slaveDevice.brand;
+                            device.model = slaveDevice.model;
+                            device.releaseVersion = slaveDevice.releaseVersion;
+                            device.sdkVersion = slaveDevice.sdkVersion;
+                            device.abi = slaveDevice.abi;
+                            var screen = slaveDevice.screen;
+                            var arrays = screen.split("x");
+                            device.screenWidth = arrays[0];
+                            device.screenHeight = arrays[1];
+                            device.plantForm = slaveDevice.plantForm;
+                            device.errorMessage = slaveDevice.errorMessage;
+                            yield device.add();
+                        }
+                    }
+
+                    //将连接成功后，又拔出的设备设置为不可用
+                    var update = new Device();
+                    var data = {
+                        status: global.DEVICE_STATUS.UNAVAILABLE
+                    };
+
+                    yield update.updateBySlaveId(slaveId, slaveDevicesSerialNumbers, data);
+
+                }
 
             }
 
+            return true;
+        } else {
+            //如果没有slave，则将原先可用的设备全部设置为不可用
+            var update = new Device();
+            var data = {
+                status: global.DEVICE_STATUS.UNAVAILABLE
+            };
+
+            yield update.updateByStatus(data);
+
+            //如果没有slave，则将slaves全部设置为不可用
+            var update = new Slave();
+            var data = {
+                status: 2
+            };
+
+            yield update.updateByStatus(data);
+            return true;
         }
-
-        return true;
-    } else {
-        //如果没有slave，则将原先可用的设备全部设置为不可用
-        var update = new Device();
-        var data = {
-            status:  global.DEVICE_STATUS.UNAVAILABLE
-        };
-
-        yield update.updateByStatus(data);
-
-        //如果没有slave，则将slaves全部设置为不可用
-        var update = new Slave();
-        var data = {
-            status: 2
-        };
-
-        yield update.updateByStatus(data);
-        return true;
+    } catch (ex) {
+        console.log(ex);
+        return false;
     }
 }
 
@@ -140,9 +145,22 @@ function *refreshAllDevicesBySlaves() {
  * 查询当前有效的设备
  */
 function *queryValidDevices() {
-    var device = new Device();
-    var result = yield device.queryValidDevices();
-    return result;
+    try {
+        var device = new Device();
+        var result = yield device.queryValidDevices();
+        for (var i = 0; i < result.length; i++) {
+            var slaveInfo = new Slave();
+            var deviceInfo = result[i];
+            var slaveId = deviceInfo.slaveId;
+            var slaveResult = yield slaveInfo.getById(slaveId);
+            deviceInfo.slaveIP = slaveResult.slaveIp;
+        }
+        return result;
+    }catch (e){
+        console.log(e);
+        return null;
+    }
+
 }
 
 /**
@@ -150,22 +168,184 @@ function *queryValidDevices() {
  * @param slave
  * @returns {*}
  */
-function *querySlaveDeviceByUrl(url) {
-
-    var result = yield request({
-        uri: url,
-        method: 'get'
-    });
-
+function *requestByUrl(url) {
     try {
+        var result = yield request({
+            uri: url,
+            method: 'get'
+        });
         result = JSON.parse(result.body);
         return result;
     } catch (e) {
         return false;
     }
 }
+function *deleteDevices() {
+    try {
+        var deviceId = this.params.deviceId;
+        var device = new Device();
+        if (yield device.removeById(deviceId)) {
+            this.body = {
+                success: true,
+                errorMsg: '删除设备成功',
+                data: null
+            };
+        } else {
+            this.body = {
+                success: false,
+                errorMsg: '删除设备失败',
+                data: null
+            };
+        }
+    }catch (e){
+        console.log(e);
+        this.body = {
+            success: false,
+            errorMsg: '删除设备失败',
+            data: null
+        };
+    }
+
+}
+
+function *controlDevices() {
+    switch (this.params.control) {
+        case 'run':
+            yield runDevices.call(this);
+            break;
+        case 'stop':
+            yield stopDevices.call(this);
+            break;
+        case 'delete':
+            yield deleteDevices.call(this);
+            break;
+        case 'record':
+            yield recordDevices.call(this);
+            break;
+    }
+}
+
+function *runDevices(){
+    yield runOrRecordDevices.call(this,false);
+}
+
+function *recordDevices(){
+    yield runOrRecordDevices.call(this,true);
+}
+
+function *runOrRecordDevices(isRecord) {
+    try{
+        var deviceId = this.params.deviceId;
+        var device = new Device();
+        var data = yield device.getById(deviceId);
+        data.status = global.DEVICE_STATUS.USING;
+
+        if (yield device.updateById(deviceId, data)) {
+
+            var display = data.screenWidth + 'x' + data.screenHeight;
+
+            var slave = new Slave();
+            var slaveData = yield slave.getById(data.slaveId);
+
+            var url = slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/run';
+
+            console.log(isRecord);
+            if(isRecord){
+                url = slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/record';
+            }
+
+            try {
+                var result = yield request({
+                    uri: url ,
+                    form: {
+                        display: data.screenWidth + 'x' + data.screenHeight,
+                        serialNumber: data.serialNumber,
+                        plantForm:data.plantForm
+                    },
+                    method: 'post'
+                });
+                this.body = result.body;
+            } catch (e) {
+                console.log(e);
+                this.body = {
+                    success: false,
+                    errorMsg: '启用设备失败',
+                    data: null
+                };
+            }
 
 
+        } else {
+            this.body = {
+                success: false,
+                errorMsg: '启用设备失败',
+                data: null
+            };
+        }
+    }catch (e){
+        console.log(e);
+        this.body = {
+            success: false,
+            errorMsg: '启用设备失败',
+            data: null
+        };
+    }
+
+}
+
+
+//停止设备
+function *stopDevices() {
+    try{
+        var deviceId = this.params.deviceId;
+        var device = new Device();
+        var data = yield device.getById(deviceId);
+        data.status = global.DEVICE_STATUS.AVAILABLE;
+        if (yield device.updateById(deviceId, data)) {
+
+            var slave = new Slave();
+            var slaveData = yield slave.getById(data.slaveId);
+
+            try {
+                var result = yield request({
+                    uri: slaveData.slaveUrl + '/devices/control_devices/' + deviceId + '/stop',
+                    form: {
+                        serialNumber: data.serialNumber
+                    },
+                    method: 'post'
+                });
+                this.body = result.body;
+            } catch (e) {
+                console.log(e);
+                this.body = {
+                    success: false,
+                    errorMsg: '停止设备失败',
+                    data: null
+                };
+            }
+
+            this.body = {
+                success: true,
+                errorMsg: '停止设备成功',
+                data: null
+            };
+        } else {
+            this.body = {
+                success: false,
+                errorMsg: '停止设备失败',
+                data: null
+            };
+        }
+    }catch (e){
+        console.log(e);
+        this.body = {
+            success: false,
+            errorMsg: '停止设备失败',
+            data: null
+        };
+    }
+
+}
 function *dispatch() {
 
     switch (this.params.method) {
@@ -176,6 +356,9 @@ function *dispatch() {
         //查询有效设备
         case 'devices':
             this.body = yield queryValidDevices.call(this);
+            break;
+        case 'control_devices':
+            yield controlDevices.call(this);
             break;
     }
 

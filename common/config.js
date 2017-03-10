@@ -19,6 +19,9 @@ const defaultCfg = {
     jobresult:'http://192.1.1.7:9090/demo/services/wsdevice/result/1/130',
     //任务开始通知修改业务系统状态接口
     jobstart:'http://192.1.1.7:9090/demo/services/wsdevice/status/',
+    //slave上传脚本路径
+    upresult:'http://localhost:3333/api/matc/result',
+
   },
   site: {
     title: 'Reliable',

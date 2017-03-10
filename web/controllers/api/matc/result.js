@@ -33,13 +33,15 @@ function* result() {
 
         var thisTaskData = yield task.getById(nameArray[0]);
         var projectId = thisTaskData.projectId;
+        const project = new Project();
+        const projectData = yield project.getById(projectId);
         var promise = new Promise(function (resolve, reject) {
           var out = fs.createReadStream(tempPath).pipe(
             fs.createWriteStream(file)//创建一个可写流
           );
           out.on('finish', function () {
             resolve("OK");
-            upload(file);
+            upload(file, projectData.resultUrl);
             jobEnd(projectId);
           });
         });
@@ -55,6 +57,7 @@ function* result() {
       data: null
     };
   } catch (ex) {
+    console.log(ex);
     this.body = {
       success: false,
       errorMsg: 'slave上传结果失败',
@@ -85,21 +88,29 @@ function jobEnd(projectId) {
 }
 
 //将结果上传到业务系统中
-function upload(file) {
-  var formData = {
-    // my_field: 'my_value',
-    // my_buffer: new Buffer([1, 2, 3]),
-    attachments: [
-      fs.createReadStream(file)
-    ],
-  };
+function upload(file, businessUrl) {
+    try{
+        var formData = {
+            // my_field: 'my_value',
+            // my_buffer: new Buffer([1, 2, 3]),
+            attachments: [
+                fs.createReadStream(file)
+            ],
+        };
 
-  request.post({ url: options.businessUrls.jobresult, formData: formData }, function optionalCallback(err, httpResponse, body) {
-    if (err) {
-      return console.error('上传结果到业务系统失败:', err,file);
+        request.post({ url: businessUrl, formData: formData }, function optionalCallback(err, httpResponse, body) {
+            if (err) {
+                return console.error('上传结果到业务系统失败:', err,file);
+            }
+            console.log('上传结果到业务系统成功:', file);
+        });
+    }catch (e){
+        console.log(e);
+        return {
+          data:'上传结果到业务系统失败'
+        };
     }
-    console.log('上传结果到业务系统成功:', file);
-  });
+
 }
 
 function* dispatch() {

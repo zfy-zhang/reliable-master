@@ -45,12 +45,12 @@ module.exports = function(app) {
 
   //matc
   app.get('/api/matc/devices/:method', controllers.api.matc.devices);
+  app.get('/api/matc/devices/:method/:deviceId/:control', controllers.api.matc.devices);
   app.post('/api/matc/jobs/:method',koaBody, controllers.api.matc.job);
   app.post('/api/matc/result',bodyParse({multipart:true}), controllers.api.matc.result);
   app.post('/api/matc/test',bodyParse({multipart:true}), controllers.api.matc.test);
 
-  //app/script½Ó¿Ú
-  app.get('/getAttachments/:method/:attachmentId',koaBody,controllers.api.matc.attachments);
+  app.get('/api/matc/getAttachments/:method/:attachmentId',koaBody,controllers.api.matc.attachments);
 
   logger.debug('router set');
 };
